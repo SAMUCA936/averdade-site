@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A VERDADE</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ background:#08080d;
+ color:white;
+ font-family:Arial,sans-serif;
+ text-align:center;
+}
+header{
+ padding:22px;
+ background:#111;
+ border-bottom:1px solid #ed233b;
+ position:sticky;top:0;
+}
+header a{color:white;margin:12px;text-decoration:none}
+.hero{
+ min-height:85vh;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ padding:25px;
+ background:radial-gradient(circle,#50101b,#08080d 70%);
+}
+h1{
+ font-size:clamp(55px,12vw,110px);
+ text-shadow:3px 0 red,-3px 0 cyan;
+ margin:15px;
+}
+h2{font-size:35px}
+p{color:#bbb;line-height:1.7;max-width:650px}
+.tag{
+ border:1px solid red;
+ padding:12px 20px;
+ color:#ff7788;
+ margin-top:20px;
+}
+section{padding:75px 20px}
+.cards{
+ display:flex;flex-wrap:wrap;
+ justify-content:center;gap:18px;
+}
+.card{
+ background:#171720;
+ border:1px solid #ffffff25;
+ padding:25px;width:260px;
+}
+.card h3{color:#ff5266}
+footer{
+ padding:30px;
+ background:#111;
+ color:#888;
+}
+.creditos{color:#63e8ee;font-weight:bold}
+</style>
+</head>
+<body>
+
+<header>
+ <a href="#inicio">INÍCIO</a>
+ <a href="#mundos">MUNDOS</a>
+ <a href="#personagens">PERSONAGENS</a>
+ <a href="#creditos">CRÉDITOS</a>
+</header>
+
+<div class="hero" id="inicio">
+ <p>VOCÊ ESTÁ PRONTO PARA DESCOBRIR?</p>
+ <h1>A VERDADE</h1>
+ <p>Entre nos portais. Explore mundos desconhecidos.
+ Descubra os segredos escondidos além da realidade.</p>
+ <div class="tag">JOGO EM DESENVOLVIMENTO</div>
+</div>
+
+<section>
+ <h2>Nem tudo é o que parece.</h2>
+ <p>Uma aventura através de dimensões misteriosas.
+ Cada portal guarda um segredo. Cada descoberta
+ pode mudar tudo.</p>
+</section>
+
+<section id="mundos">
+ <h2>OS MUNDOS</h2>
+ <div class="cards">
+  <div class="card">
+   <h3>O DESCONHECIDO</h3>
+   <p>Explore lugares misteriosos e descubra novos caminhos.</p>
+  </div>
+  <div class="card">
+   <h3>MUNDO DE CUPHEAD</h3>
+   <p>Um universo de desenhos antigos e personagens especiais.</p>
+  </div>
+  <div class="card">
+   <h3>O ÚLTIMO PORTAL</h3>
+   <p>O que espera do outro lado?</p>
+  </div>
+ </div>
+</section>
+
+<section id="personagens">
+ <h2>PERSONAGENS</h2>
+ <p>Desbloqueie personagens de diferentes mundos
+ e leve seus favoritos para novas dimensões!</p>
+</section>
+
+<section>
+ <h2>ISSO SÓ COMEÇOU...</h2>
+ <p>Você ainda quer continuar?</p>
+</section>
+
+<section id="creditos">
+ <h2>CRÉDITOS</h2>
+ <p class="creditos">SAMUCA & VOID</p>
+</section>
+
+<footer>
+ A VERDADE © 2026 — TODOS OS DIREITOS RESERVADOS
+</footer>
+
+</body>
+</html>
