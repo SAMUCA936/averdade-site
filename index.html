@@ -1,206 +1,356 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A VERDADE — SAMUCA × VOID</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#050509;color:#eee;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
-#stage{height:100vh;display:grid;place-items:center;background:radial-gradient(ellipse,#1b121a,#050509 72%)}
-canvas{width:min(100vw,1100px);height:auto;max-height:100vh;border:1px solid #45303b;box-shadow:0 0 55px #000;background:#0b0a10}
-.screen{position:fixed;inset:0;display:grid;place-items:center;background:rgba(3,3,8,.88);padding:18px}
-.panel{width:min(520px,94vw);padding:32px 26px;text-align:center;background:linear-gradient(145deg,#1b141d,#08080d);border:1px solid #70404d;box-shadow:0 0 45px #000,0 0 30px #65172a33}
-h1{font-size:clamp(40px,8vw,76px);letter-spacing:8px;margin:0;text-shadow:0 0 20px #c21f40}
-.sub{font-size:11px;letter-spacing:4px;color:#a99aa4;margin:12px 0 26px}
-button{width:100%;padding:13px;margin:7px 0;color:#f4edf0;background:#171117;border:1px solid #70404d;letter-spacing:2px;font-size:15px;cursor:pointer}
-button:hover{background:#35131e;border-color:#f05b70}
-#hint{font-size:12px;color:#aaa;line-height:1.7;margin-top:16px}
-#topmsg{position:fixed;top:16px;left:0;right:0;text-align:center;pointer-events:none;color:#eee;letter-spacing:2px;font-size:13px;text-shadow:0 2px 6px #000}
+body{margin:0;background:#050509;color:white;font-family:Arial;overflow:hidden}
+button{background:#17121c;color:white;border:1px solid #814054;padding:13px;margin:5px;cursor:pointer;font-size:14px;letter-spacing:1px}
+button:hover{background:#572035;border-color:#ff496a}
+button:disabled{opacity:.3;cursor:not-allowed}
+.screen{position:fixed;inset:0;background:radial-gradient(ellipse,#241522,#050509 75%);display:flex;align-items:center;justify-content:center;padding:15px;overflow:auto}
 .hidden{display:none!important}
-.credits h2{letter-spacing:5px;font-size:42px;margin:8px}
-.red{color:#e0445b;text-shadow:0 0 16px #b21b34}
-@media(max-width:600px){.panel{padding:24px 18px}}
+.panel{width:min(850px,96vw);max-height:94vh;overflow:auto;text-align:center;padding:25px;background:#100d16;border:1px solid #814054;box-shadow:0 0 45px #000}
+h1{font-size:clamp(35px,7vw,65px);letter-spacing:7px;color:#f45b78;text-shadow:0 0 20px #a20e36;margin:12px}
+h2{color:#ff7189}
+.subtitle{color:#aaa;letter-spacing:3px;font-size:12px;margin:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:20px 0}
+.world{min-height:125px;padding:15px;border:1px solid #633447;background:#1a111c}
+.world strong{display:block;font-size:17px;margin-bottom:10px}
+.world span{font-size:12px;color:#bbb}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:20px auto;max-width:550px}
+.levels button{min-height:58px;margin:0;font-size:17px}
+#gameArea{height:100vh;display:flex;align-items:center;justify-content:center;background:#050509}
+canvas{width:min(100vw,1100px);height:auto;max-height:100vh;border:1px solid #633447}
+#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;pointer-events:none;font-weight:bold;text-shadow:0 2px 5px black}
+#mobile{position:fixed;bottom:15px;left:0;right:0;display:none;justify-content:space-between;padding:0 15px;pointer-events:none}
+#mobile button{pointer-events:auto;width:65px;height:60px;font-size:23px;background:#211522dd}
+.small{font-size:12px;color:#aaa}
+@media(max-width:650px){.levels{grid-template-columns:repeat(5,1fr)}#mobile{display:flex}.panel{padding:15px}}
 </style>
 </head>
 <body>
 
-<div id="stage"><canvas id="game" width="960" height="540" aria-label="Jogo A Verdade"></canvas></div>
-<div id="topmsg"></div>
+<div id="gameArea">
+<canvas id="game" width="960" height="540"></canvas>
+</div>
+
+<div id="hud" class="hidden">
+<span id="worldLabel"></span>
+<span id="coinLabel">🪙 0</span>
+<span id="levelLabel"></span>
+</div>
+
+<div id="mobile" class="hidden">
+<div>
+<button id="left">◀</button>
+<button id="right">▶</button>
+</div>
+<button id="jump">⬆</button>
+</div>
 
 <section class="screen" id="menu">
 <div class="panel">
 <h1>A VERDADE</h1>
-<div class="sub">UM MISTÉRIO COMEÇA</div>
+<div class="subtitle">SAMUCA × VOID APRESENTAM</div>
+<p>UMA AVENTURA AINDA NÃO TERMINOU...</p>
 <button id="play">JOGAR</button>
-<button id="options">OPÇÕES</button>
-<button id="quit">SAIR</button>
-<div id="hint">SAMUCA × VOID APRESENTAM<br>Uma aventura ainda não terminou...</div>
+<button id="continue">CONTINUAR</button>
+<button id="menuOptions">COMO JOGAR</button>
+<p class="small">ATUALIZAÇÃO 2.0 — MUNDOS E FASES</p>
 </div>
 </section>
 
-<section class="screen hidden" id="pause">
+<section class="screen hidden" id="worldScreen">
 <div class="panel">
-<h1 style="font-size:42px">PAUSADO</h1>
+<h1>MUNDOS</h1>
+<div class="subtitle">CINCO DIMENSÕES. CINQUENTA DESAFIOS.</div>
+<div class="grid" id="worldGrid"></div>
+<button id="worldBack">VOLTAR</button>
+</div>
+</section>
+
+<section class="screen hidden" id="levelScreen">
+<div class="panel">
+<h1 id="levelTitle">FASES</h1>
+<div class="subtitle">ESCOLHA SEU DESAFIO</div>
+<div id="levelGrid" class="levels"></div>
+<p id="levelInfo" class="small"></p>
+<button id="levelBack">VOLTAR AOS MUNDOS</button>
+</div>
+</section>
+
+<section class="screen hidden" id="pauseScreen">
+<div class="panel">
+<h1>PAUSADO</h1>
 <button id="resume">CONTINUAR</button>
-<button id="restart">RECOMEÇAR FASE</button>
-<button id="back">MENU PRINCIPAL</button>
+<button id="retry">RECOMEÇAR FASE</button>
+<button id="pauseLevels">ESCOLHER FASE</button>
+</div>
+</section>
+
+<section class="screen hidden" id="optionsScreen">
+<div class="panel">
+<h1>CONTROLES</h1>
+<p>A / D ou ← / → : ANDAR</p>
+<p>ESPAÇO ou W ou ↑ : PULAR</p>
+<p>ESC : PAUSAR</p>
+<p>PEGUE AS MOEDAS E ENCONTRE O PORTAL!</p>
+<button id="optionsBack">VOLTAR</button>
+</div>
+</section>
+
+<section class="screen hidden" id="finishScreen">
+<div class="panel">
+<h1 id="finishTitle">FASE CONCLUÍDA!</h1>
+<h2 id="finishReward"></h2>
+<p id="finishText">O próximo desafio espera.</p>
+<button id="nextLevel">PRÓXIMA FASE</button>
+<button id="finishLevels">ESCOLHER FASE</button>
 </div>
 </section>
 
 <section class="screen hidden" id="credits">
-<div class="panel credits">
-<div class="sub">UM JOGO CRIADO POR</div>
-<h2>SAMUCA</h2>
-<div class="sub">+</div>
-<h2 class="red">VOID</h2>
-<div class="sub" style="margin-top:24px">FIM... OU SERÁ QUE NÃO?</div>
-<button id="again">VOLTAR AO INÍCIO</button>
+<div class="panel">
+<h2>UM JOGO CRIADO POR</h2>
+<h1>SAMUCA</h1>
+<h2>+</h2>
+<h1>VOID</h1>
+<p>ISSO SÓ COMEÇOU.</p>
+<button id="creditsBack">VOLTAR AO MENU</button>
 </div>
 </section>
 
 <script>
-const canvas=document.querySelector('#game'),c=canvas.getContext('2d'),$=id=>document.getElementById(id);
-let state='menu',keys={},camera=0,frame=0,fragments=0,checkpoint=100;
-const worldW=2380,portalX=2180;
-let player;
+const $=id=>document.getElementById(id);
+const canvas=$('game');
+const c=canvas.getContext('2d');
 
-const platforms=[
-{x:0,y:478,w:570,h:62},
-{x:650,y:478,w:400,h:62},
-{x:1120,y:478,w:410,h:62},
-{x:1600,y:478,w:780,h:62},
-{x:330,y:390,w:145,h:18},
-{x:760,y:385,w:145,h:18},
-{x:1230,y:365,w:150,h:18},
-{x:1740,y:390,w:145,h:18},
-{x:1950,y:335,w:130,h:18}
+const worlds=[
+{name:'STICKMAN',desc:'O começo da aventura',bg:['#19121d','#07080d'],color:'#e34b68'},
+{name:'MINECRAFT',desc:'Uma dimensão de blocos',bg:['#173b29','#07160e'],color:'#6acb76'},
+{name:'SONIC',desc:'Velocidade extrema',bg:['#103e75','#06142c'],color:'#46bafa'},
+{name:'O DESCONHECIDO',desc:'Algo está observando...',bg:['#321332','#090610'],color:'#b34cff'},
+{name:'A VERDADE',desc:'A última dimensão',bg:['#4b0715','#050003'],color:'#ff153d'}
 ];
 
-const spikes=[
-{x:500,y:454,w:70,h:24},
-{x:990,y:454,w:65,h:24},
-{x:1450,y:454,w:80,h:24},
-{x:1870,y:454,w:70,h:24}
-];
+let save={coins:0,unlocked:1,completed:[],world:0,level:1};
+try{
+const old=JSON.parse(localStorage.getItem('averdade_save'));
+if(old)save={...save,...old};
+}catch(e){}
 
-const shards=[
-{x:395,y:350,taken:false},
-{x:825,y:345,taken:false},
-{x:1300,y:325,taken:false},
-{x:1805,y:350,taken:false}
-];
-
-let enemy={x:1180,y:442,w:28,h:36,min:1160,max:1430,dir:1,alive:true};
-
-function reset(){
-player={x:90,y:410,w:26,h:62,vx:0,vy:0,onGround:false,face:1,alive:true};
-camera=0;frame=0;fragments=0;checkpoint=100;
-shards.forEach(s=>s.taken=false);
-enemy={x:1180,y:442,w:28,h:36,min:1160,max:1430,dir:1,alive:true};
+function persist(){
+localStorage.setItem('averdade_save',JSON.stringify(save));
 }
+
+let state='menu',world=0,level=1;
+let keys={},player={},camera=0,frame=0;
+let platforms=[],spikes=[],coins=[],enemy=[],portal=0;
+let collected=0,runCoins=0,finishReward=0;
 
 function show(id){
-['menu','pause','credits'].forEach(x=>$(x).classList.toggle('hidden',x!==id));
+document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));
+if(id)$ (id).classList.remove('hidden');
 }
 
-function start(){
-reset();
+function renderWorlds(){
+const grid=$('worldGrid');
+grid.innerHTML='';
+worlds.forEach((w,i)=>{
+const unlocked=i===0||save.unlocked>(i*10);
+const completed=save.completed.filter(n=>Math.ceil(n/10)===i+1).length;
+const b=document.createElement('button');
+b.className='world';
+b.disabled=!unlocked;
+b.innerHTML=`<strong style="color:${w.color}">${i+1}. ${w.name}</strong><span>${w.desc}</span><br><span>${completed}/10 FASES</span><br><span>${unlocked?'DESBLOQUEADO':'🔒 BLOQUEADO'}</span>`;
+b.onclick=()=>openWorld(i);
+grid.appendChild(b);
+});
+}
+
+function openWorld(i){
+world=i;
+$('levelTitle').textContent=worlds[i].name;
+$('levelInfo').textContent='Moedas: '+save.coins+' 🪙';
+const grid=$('levelGrid');
+grid.innerHTML='';
+for(let n=1;n<=10;n++){
+const number=i*10+n;
+const unlocked=number<=save.unlocked;
+const done=save.completed.includes(number);
+const b=document.createElement('button');
+b.disabled=!unlocked;
+b.textContent=done?'✓ '+n:unlocked?n:'🔒';
+b.style.borderColor=done?'#45bd78':'';
+b.onclick=()=>startGame(i,n);
+grid.appendChild(b);
+}
+show('levelScreen');
+}
+
+function generateLevel(){
+const offset=world*1000+level*80;
+const width=2200+level*35;
+platforms=[
+{x:0,y:478,w:width,h:62}
+];
+spikes=[];
+coins=[];
+enemy=[];
+
+for(let i=1;i<13;i++){
+let x=i*155+100;
+let y=390+(i%3)*-35;
+platforms.push({x,y,w:115,h:18});
+if(i%3===0)spikes.push({x:x+55,y:454,w:45,h:24});
+if(i%2===0)coins.push({x:x+55,y:y-32,taken:false});
+}
+for(let i=0;i<7;i++){
+coins.push({x:300+i*270,y:425,taken:false});
+}
+portal=width-120;
+}
+
+function startGame(w,n){
+world=w;level=n;
+save.world=w;save.level=n;
+persist();
+player={x:65,y:400,w:27,h:62,vx:0,vy:0,onGround:false};
+camera=0;frame=0;runCoins=0;collected=0;
+generateLevel();
 state='play';
-show('none');
-$('topmsg').textContent='ENCONTRE OS FRAGMENTOS. ALCANCE O PORTAL.';
+show(null);
+$('hud').classList.remove('hidden');
+$('mobile').classList.remove('hidden');
+$('worldLabel').textContent=worlds[world].name;
+$('levelLabel').textContent='FASE '+level+'/10';
+$('coinLabel').textContent='🪙 '+save.coins;
 }
 
-$('play').onclick=start;
-$('resume').onclick=()=>{state='play';show('none')};
-$('restart').onclick=()=>{reset();state='play';show('none')};
-$('back').onclick=()=>{state='menu';show('menu');$('topmsg').textContent=''};
-$('again').onclick=()=>{state='menu';show('menu');$('topmsg').textContent=''};
+function pause(){
+if(state!=='play')return;
+state='pause';
+$('hud').classList.add('hidden');
+$('mobile').classList.add('hidden');
+show('pauseScreen');
+}
 
-$('options').onclick=()=>{
-$('hint').innerHTML='CONTROLES: A/D ou ←/→ ANDAR · ESPAÇO PULAR<br>ESC PAUSAR · MÚSICA DESATIVADA<br>OBJETIVO: ENCONTRE OS FRAGMENTOS E O PORTAL.'
-};
+function resume(){
+state='play';
+show(null);
+$('hud').classList.remove('hidden');
+$('mobile').classList.remove('hidden');
+}
 
-$('quit').onclick=()=>{
-$('hint').textContent='Para sair, feche esta aba. Até a próxima.'
+function completeLevel(){
+if(state!=='play')return;
+state='finish';
+finishReward=5+collected*2;
+runCoins=runCoins;
+save.coins+=finishReward;
+const number=world*10+level;
+if(!save.completed.includes(number))save.completed.push(number);
+if(save.unlocked<number+1)save.unlocked=number+1;
+persist();
+$('hud').classList.add('hidden');
+$('mobile').classList.add('hidden');
+$('finishTitle').textContent=level===10?(world===4?'FIM DO MUNDO!':'MUNDO CONCLUÍDO!'):'FASE CONCLUÍDA!';
+$('finishReward').textContent='+'+finishReward+' MOEDAS 🪙';
+$('finishText').textContent='Você coletou '+collected+' moedas durante a fase.';
+$('nextLevel').textContent=world===4&&level===10?'VER CRÉDITOS':level===10?'PRÓXIMO MUNDO':'PRÓXIMA FASE';
+show('finishScreen');
+}
+
+function next(){
+if(world===4&&level===10){
+state='credits';
+show('credits');
+return;
+}
+if(level===10){openWorld(world+1);return;}
+startGame(world,level+1);
+}
+
+function resetLevel(){startGame(world,level)}
+
+$('play').onclick=()=>{renderWorlds();show('worldScreen')};
+$('continue').onclick=()=>{
+const n=Math.min(save.unlocked,50);
+openWorld(Math.floor((n-1)/10));
 };
+$('menuOptions').onclick=()=>show('optionsScreen');
+$('worldBack').onclick=()=>show('menu');
+$('levelBack').onclick=()=>show('worldScreen');
+$('optionsBack').onclick=()=>show('menu');
+$('resume').onclick=resume;
+$('retry').onclick=resetLevel;
+$('pauseLevels').onclick=()=>{renderWorlds();show('worldScreen')};
+$('nextLevel').onclick=next;
+$('finishLevels').onclick=()=>{renderWorlds();show('worldScreen')};
+$('creditsBack').onclick=()=>show('menu');
 
 window.addEventListener('keydown',e=>{
-let k=e.key.toLowerCase();
+const k=e.key.toLowerCase();
 keys[k]=true;
 if(k===' '||k.startsWith('arrow'))e.preventDefault();
 if(k==='escape'){
-if(state==='play'){state='pause';show('pause')}
-else if(state==='pause'){state='play';show('none')}
+if(state==='play')pause();
+else if(state==='pause')resume();
 }
 });
-
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 
-function box(x,y,w,h,color){
-c.fillStyle=color;
-c.fillRect(x,y,w,h);
+function bindMobile(id,key){
+const b=$(id);
+b.addEventListener('pointerdown',e=>{e.preventDefault();keys[key]=true});
+['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));
 }
+bindMobile('left','arrowleft');
+bindMobile('right','arrowright');
+bindMobile('jump',' ');
 
-function playerDraw(){
+function drawPlayer(){
 c.save();
 c.translate(player.x+13,player.y+5);
-c.strokeStyle='#eee9ed';
+c.strokeStyle='#fff';
 c.lineWidth=5;
 c.lineCap='round';
-c.shadowColor='#e9dce5';
-c.shadowBlur=8;
+c.shadowColor=worlds[world].color;
+c.shadowBlur=12;
 c.beginPath();
 c.arc(0,8,8,0,Math.PI*2);
-c.stroke();
-c.beginPath();
-c.moveTo(0,17);
-c.lineTo(0,40);
-c.moveTo(0,24);
-c.lineTo(-11,32);
-c.moveTo(0,24);
-c.lineTo(11,32);
-c.moveTo(0,40);
-c.lineTo(-9,55);
-c.moveTo(0,40);
-c.lineTo(9,55);
+c.moveTo(0,17);c.lineTo(0,40);
+c.moveTo(0,24);c.lineTo(-11,32);
+c.moveTo(0,24);c.lineTo(11,32);
+c.moveTo(0,40);c.lineTo(-9,55);
+c.moveTo(0,40);c.lineTo(9,55);
 c.stroke();
 c.restore();
-}
-
-function respawn(){
-player.x=checkpoint;
-player.y=400;
-player.vx=player.vy=0;
-$('topmsg').textContent='VOCÊ CAIU. CONTINUE...';
 }
 
 function update(){
 if(state!=='play')return;
 frame++;
-
-let L=keys.a||keys.arrowleft;
-let R=keys.d||keys.arrowright;
-
-player.vx=L?-4.2:R?4.2:0;
-if(L)player.face=-1;
-if(R)player.face=1;
+const left=keys.a||keys.arrowleft;
+const right=keys.d||keys.arrowright;
+player.vx=left?-4.3:right?4.3:0;
 
 if((keys[' ']||keys.w||keys.arrowup)&&player.onGround){
 player.vy=-12.5;
 player.onGround=false;
 }
-
 player.vy=Math.min(player.vy+.58,14);
-player.x=Math.max(0,Math.min(worldW-player.w,player.x+player.vx));
-
-let oldY=player.y;
+player.x=Math.max(0,Math.min(portal-10,player.x+player.vx));
+const old=player.y;
 player.y+=player.vy;
 player.onGround=false;
 
 for(const p of platforms){
-if(player.x+player.w>p.x&&player.x<p.x+p.w&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.vy>=0){
+if(player.x+player.w>p.x&&player.x<p.x+p.w&&old+player.h<=p.y&&player.y+player.h>=p.y&&player.vy>=0){
 player.y=p.y-player.h;
 player.vy=0;
 player.onGround=true;
@@ -208,129 +358,70 @@ player.onGround=true;
 }
 
 for(const s of spikes){
-if(player.x+player.w>s.x&&player.x<s.x+s.w&&player.y+player.h>s.y+5)respawn();
-}
-
-if(enemy.alive){
-enemy.x+=enemy.dir*1.25;
-if(enemy.x<enemy.min||enemy.x>enemy.max)enemy.dir*=-1;
-
-if(player.x+player.w>enemy.x&&player.x<enemy.x+enemy.w&&player.y+player.h>enemy.y&&player.y<enemy.y+enemy.h){
-if(player.vy>1&&player.y+player.h-enemy.y<18){
-enemy.alive=false;
-player.vy=-8;
-$('topmsg').textContent='INIMIGO DERROTADO!';
-}else respawn();
+if(player.x+player.w>s.x&&player.x<s.x+s.w&&player.y+player.h>s.y+5){
+player.x=Math.max(50,player.x-100);
+player.y=400;player.vy=0;
 }
 }
 
-for(const s of shards){
-if(!s.taken&&Math.abs((player.x+13)-s.x)<25&&Math.abs((player.y+25)-s.y)<35){
-s.taken=true;
-fragments++;
-$('topmsg').textContent='FRAGMENTO ENCONTRADO: '+fragments+'/4';
+for(const coin of coins){
+if(!coin.taken&&Math.abs(player.x+13-coin.x)<24&&Math.abs(player.y+25-coin.y)<35){
+coin.taken=true;
+collected++;
 }
 }
 
-if(player.x>checkpoint+430&&checkpoint<700)checkpoint=650;
-if(player.y>620)respawn();
+if(player.y>620){player.x=65;player.y=400;player.vy=0}
+if(player.x>=portal-20)completeLevel();
 
-if(player.x>portalX){
-state='credits';
-show('credits');
-$('topmsg').textContent='';
-}
-
-camera=Math.max(0,Math.min(player.x-300,worldW-960));
+camera=Math.max(0,Math.min(player.x-300,portal-650));
+$('coinLabel').textContent='🪙 '+save.coins+' + '+collected;
 }
 
 function draw(){
-let g=c.createLinearGradient(0,0,0,540);
-g.addColorStop(0,'#19121d');
-g.addColorStop(1,'#07080d');
-c.fillStyle=g;
-c.fillRect(0,0,960,540);
+const w=worlds[world]||worlds[0];
+const g=c.createLinearGradient(0,0,0,540);
+g.addColorStop(0,w.bg[0]);
+g.addColorStop(1,w.bg[1]);
+c.fillStyle=g;c.fillRect(0,0,960,540);
 
-for(let i=0;i<45;i++){
-let x=((i*137-camera*.13)%1000+1000)%1000;
-let y=(i*71)%330;
-c.fillStyle='rgba(211,165,190,.22)';
+for(let i=0;i<55;i++){
+let x=((i*137-camera*.12)%1000+1000)%1000;
+let y=i*67%390;
+c.fillStyle='rgba(255,255,255,.2)';
 c.fillRect(x,y,2,2);
 }
 
+if(state==='play'||state==='pause'||state==='finish'){
 c.save();
 c.translate(-camera,0);
-
-for(let i=0;i<13;i++){
-let x=i*210+80;
-box(x,300-(i%3)*35,55,178,'#100f17');
-box(x+9,315-(i%3)*35,5,90,'#29202d');
-}
-
 for(const p of platforms){
-box(p.x,p.y,p.w,p.h,'#28242e');
-box(p.x,p.y,p.w,4,'#765461');
+c.fillStyle='#29232e';c.fillRect(p.x,p.y,p.w,p.h);
+c.fillStyle=w.color;c.fillRect(p.x,p.y,p.w,4);
 }
-
 for(const s of spikes){
-c.fillStyle='#b42c46';
+c.fillStyle='#e63d59';
 c.beginPath();
-for(let i=0;i<5;i++){
-let x=s.x+i*s.w/4;
-c.lineTo(x,s.y+(i%2?24:0));
+c.moveTo(s.x,s.y+s.h);c.lineTo(s.x+s.w/2,s.y);c.lineTo(s.x+s.w,s.y+s.h);c.fill();
 }
-c.lineTo(s.x+s.w,s.y+s.h);
-c.lineTo(s.x,s.y+s.h);
-c.fill();
-}
-
-for(const s of shards){
-if(!s.taken){
+for(const coin of coins){
+if(coin.taken)continue;
 c.save();
-c.translate(s.x,s.y+Math.sin(frame/15)*4);
-c.rotate(Math.PI/4);
-c.shadowColor='#e44b6a';
-c.shadowBlur=18;
-box(-7,-7,14,14,'#ed7890');
+c.translate(coin.x,coin.y+Math.sin(frame/12)*4);
+c.shadowColor='#ffe15a';c.shadowBlur=18;
+c.fillStyle='#ffd84a';
+c.beginPath();c.arc(0,0,9,0,Math.PI*2);c.fill();
 c.restore();
 }
-}
-
-if(enemy.alive){
-c.shadowColor='#d32e4d';
-c.shadowBlur=15;
-box(enemy.x,enemy.y,enemy.w,enemy.h,'#541a2b');
-box(enemy.x+5,enemy.y+8,5,4,'#ff7185');
-box(enemy.x+18,enemy.y+8,5,4,'#ff7185');
+c.shadowColor=w.color;c.shadowBlur=28;
+c.strokeStyle=w.color;c.lineWidth=7;
+c.beginPath();c.ellipse(portal,410,27,68,0,0,Math.PI*2);c.stroke();
 c.shadowBlur=0;
-}
-
-c.shadowColor='#e52b50';
-c.shadowBlur=30;
-c.strokeStyle='#e24b68';
-c.lineWidth=7;
-c.beginPath();
-c.ellipse(portalX+28,410,28,68,0,0,Math.PI*2);
-c.stroke();
-c.shadowBlur=0;
-c.fillStyle='rgba(175,20,50,.2)';
-c.beginPath();
-c.ellipse(portalX+28,410,22,60,0,0,Math.PI*2);
-c.fill();
-
-playerDraw();
+drawPlayer();
 c.restore();
-
-c.fillStyle='#eee';
-c.font='bold 14px Arial';
-c.fillText('MUNDO 01 / O CAMINHO',24,28);
-c.font='12px Arial';
-c.fillStyle='#aaa';
-c.fillText('FRAGMENTOS '+fragments+'/4',24,49);
-box(24,60,190,3,'#39313b');
-box(24,60,Math.min(190,player.x/portalX*190),3,'#d13c59');
-c.fillStyle='#aaa';
-c.fillText('A/D ou ←/→ mover · ESPAÇO pular · ESC pausar',24,520);
+c.fillStyle='white';c.font='bold 15px Arial';
+c.fillText(w.name+' / FASE '+level,24,510);
+}
 }
 
 function loop(){
@@ -338,8 +429,6 @@ update();
 draw();
 requestAnimationFrame(loop);
 }
-
-reset();
 loop();
 </script>
 </body>
